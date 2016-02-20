@@ -85,7 +85,7 @@ int main(int argc, const char *argv[]) {
   Stats nochangeStats;
   nochangeStats.changeStrategy = false;
 
-  for (size_t i = 0; i < 1000000; ++i) {
+  for (size_t i = 0; i < 100; ++i) {
     playGame(changeStats);
     playGame(nochangeStats);
   }
