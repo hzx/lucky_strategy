@@ -5,68 +5,59 @@
 
 struct Stats {
   bool changeStrategy = false;
-  int win = 0;
-  int lose = 0;
+  size_t win = 0;
+  size_t lose = 0;
 };
 
 
-int cutWrongChoice(int car, int choice) {
-  if (car == choice) {
-    int cutChoice = std::rand() % 2;
+size_t cutWrongChoice(size_t car, size_t choice) {
+  std::vector<size_t> cells = {0, 0, 0};
+  cells[car] = 1;
+  cells[choice] = 1;
 
-    // make shift related to car
-    switch (car) {
-      case 0:
-        ++cutChoice;
-        break;
-      case 1:
-        if (cutChoice == car) ++cutChoice;
-        break;
-      case 2: // do nothing
-        break;
+  std::vector<size_t> freeIndexes;
+  for (size_t i = 0; i < cells.size(); ++i) {
+    if (cells[i] == 0) {
+      freeIndexes.push_back(i);
     }
-
-    return cutChoice;
   }
 
-  // choose one free of the three cells
-  std::vector<int> busy = {0, 0, 0};
+  size_t cutted = std::rand() % freeIndexes.size();
+  return freeIndexes[cutted];
+}
 
-  // set busy with car
-  busy[car] = 1;
-  busy[choice] = 1;
 
-  for (size_t i = 0; i < busy.size(); ++i) {
-    if (busy[i] == 0) return i;
+size_t makeNewChoice(size_t choice, size_t cutted) {
+  std::vector<size_t> cells = {0, 0, 0};
+  cells[cutted] = 1;
+  cells[choice] = 1;
+
+  std::vector<size_t> freeIndexes;
+  for (size_t i = 0; i < cells.size(); ++i) {
+    if (cells[i] == 0) {
+      freeIndexes.push_back(i);
+    }
   }
+
+  size_t newIndex = std::rand() % freeIndexes.size();
+  return freeIndexes[newIndex];
 }
 
 
 void playGame(Stats& stats) {
   // choose car
-  int car = std::rand() % 3;
+  size_t car = std::rand() % 3;
 
   // make choice
-  int choice = std::rand() % 3;
+  size_t choice = std::rand() % 3;
 
   // cut wrong choice
-  int cutted = cutWrongChoice(car, choice);
+  size_t cutted = cutWrongChoice(car, choice);
 
   // apply strategy
-  std::vector<int> cells = {0, 0, 0};
-  cells[cutted] = 1;
-  cells[choice] = 1;
-
-  int newChoice = choice;
-
+  size_t newChoice = choice;
   if (stats.changeStrategy) {
-    // choose empty cell
-    for (size_t i = 0; i < cells.size(); ++i) {
-      if (cells[i] == 0) {
-        newChoice = i;
-        break;
-      }
-    }
+    newChoice = makeNewChoice(choice, cutted);
   }
 
   // finish
@@ -79,19 +70,24 @@ void playGame(Stats& stats) {
 
 
 int main(int argc, const char *argv[]) {
-  Stats changeStats;
-  changeStats.changeStrategy = true;
+  size_t const GAMES_COUNT = 100;
 
-  Stats nochangeStats;
-  nochangeStats.changeStrategy = false;
+  Stats change;
+  change.changeStrategy = true;
 
-  for (size_t i = 0; i < 100; ++i) {
-    playGame(changeStats);
-    playGame(nochangeStats);
+  Stats nochange;
+  nochange.changeStrategy = false;
+
+  for (size_t i = 0; i < GAMES_COUNT; ++i) {
+    playGame(change);
   }
 
-  std::cout << "changeStats, win: " << changeStats.win << ", lose: " << changeStats.lose << std::endl;
-  std::cout << "nochangeStats, win: " << nochangeStats.win << ", lose: " << nochangeStats.lose << std::endl;
+  for (size_t i = 0; i < GAMES_COUNT; ++i) {
+    playGame(nochange);
+  }
+
+  std::cout << "change, win: " << change.win << ", lose: " << change.lose << std::endl;
+  std::cout << "nochange, win: " << nochange.win << ", lose: " << nochange.lose << std::endl;
 
   return 0;
 }
