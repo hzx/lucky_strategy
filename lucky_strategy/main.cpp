@@ -1,12 +1,19 @@
 #include <iostream>
 #include <cstdlib>
 #include <vector>
+#include <string>
 
 
-struct Stats {
-  bool changeStrategy = false;
+struct Player {
+  std::string name;
+  bool alwaysChange = false;
   size_t win = 0;
   size_t lose = 0;
+
+  void print() {
+    std::cout << '[' << name << "] alwaysChange: " << alwaysChange <<
+      ", win: " << win << ", lose: " << lose << std::endl;
+  }
 };
 
 
@@ -44,7 +51,7 @@ size_t makeNewChoice(size_t choice, size_t cutted) {
 }
 
 
-void playGame(Stats& stats) {
+void playGame(Player& player) {
   // choose car
   size_t car = std::rand() % 3;
 
@@ -55,16 +62,14 @@ void playGame(Stats& stats) {
   size_t cutted = cutWrongChoice(car, choice);
 
   // apply strategy
-  size_t newChoice = choice;
-  if (stats.changeStrategy) {
-    newChoice = makeNewChoice(choice, cutted);
-  }
+  size_t newChoice = player.alwaysChange ?
+    makeNewChoice(choice, cutted) :  choice;
 
   // finish
   if (newChoice == car) {
-    ++stats.win;
+    ++player.win;
   } else {
-    ++stats.lose;
+    ++player.lose;
   }
 }
 
@@ -72,22 +77,26 @@ void playGame(Stats& stats) {
 int main(int argc, const char *argv[]) {
   size_t const GAMES_COUNT = 100;
 
-  Stats change;
-  change.changeStrategy = true;
+  Player brave {
+    name: "brave",
+    alwaysChange: true,
+  };
 
-  Stats nochange;
-  nochange.changeStrategy = false;
+  Player coward {
+    name: "coward",
+    alwaysChange: false,
+  };
 
   for (size_t i = 0; i < GAMES_COUNT; ++i) {
-    playGame(change);
+    playGame(brave);
   }
 
   for (size_t i = 0; i < GAMES_COUNT; ++i) {
-    playGame(nochange);
+    playGame(coward);
   }
 
-  std::cout << "change, win: " << change.win << ", lose: " << change.lose << std::endl;
-  std::cout << "nochange, win: " << nochange.win << ", lose: " << nochange.lose << std::endl;
+  brave.print();
+  coward.print();
 
   return 0;
 }
